@@ -140,7 +140,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "D:\\A VS CODE PROJECTS\\reddit\\backend\\prisma\\generated",
+      "value": "D:\\VS code\\web development\\community\\backend\\prisma\\generated",
       "fromEnvVar": null
     },
     "config": {
@@ -151,10 +151,14 @@ const config = {
         "fromEnvVar": null,
         "value": "windows",
         "native": true
+      },
+      {
+        "fromEnvVar": null,
+        "value": "rhel-openssl-3.0.x"
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "D:\\A VS CODE PROJECTS\\reddit\\backend\\prisma\\schema.prisma",
+    "sourceFilePath": "D:\\VS code\\web development\\community\\backend\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
@@ -168,6 +172,7 @@ const config = {
     "db"
   ],
   "activeProvider": "postgresql",
+  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
@@ -176,8 +181,8 @@ const config = {
       }
     }
   },
-  "inlineSchema": "generator client {\n  provider = \"prisma-client-js\"\n  output   = \"./generated\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel User {\n  id           String   @id @default(cuid())\n  email        String   @unique\n  name         String\n  username     String   @unique\n  avatar       String?\n  role         Role     @default(USER)\n  provider     String\n  universityId String? // optional, link to university\n  publicKey    String? // for E2EE\n  createdAt    DateTime @default(now())\n  updatedAt    DateTime @updatedAt\n}\n\nenum Role {\n  USER\n  MODERATOR\n  ADMIN\n}\n",
-  "inlineSchemaHash": "855a4b6499324fccf17a50d3c5fbc30cff546236da234341fb47145bc908227e",
+  "inlineSchema": "generator client {\n  provider      = \"prisma-client-js\"\n  output        = \"./generated\"\n  binaryTargets = [\"native\", \"rhel-openssl-3.0.x\"]\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel User {\n  id           String   @id @default(cuid())\n  email        String   @unique\n  name         String\n  username     String   @unique\n  avatar       String?\n  role         Role     @default(USER)\n  provider     String\n  universityId String? // optional, link to university\n  publicKey    String? // for E2EE\n  createdAt    DateTime @default(now())\n  updatedAt    DateTime @updatedAt\n}\n\nenum Role {\n  USER\n  MODERATOR\n  ADMIN\n}\n",
+  "inlineSchemaHash": "a6bf9ddd8a7d7a130372cbd62d90178ce945686b81fa1e82d10fdcea6f7576db",
   "copyEngine": true
 }
 config.dirname = '/'
