@@ -11,7 +11,6 @@ export class AuthService {
   ) {}
 
   async validateGoogleUser(profile: any) {
-    console.log(profile);
     const email = profile.email;
     if (!email) {
       throw new Error('not a university email');

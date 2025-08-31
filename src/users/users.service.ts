@@ -16,7 +16,6 @@ export class UsersService {
   }
 
   create(user: any) {
-    console.log(user);
     return this.prisma.user.create({ data: user });
   }
 }
