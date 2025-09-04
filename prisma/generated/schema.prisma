@@ -17,14 +17,31 @@ model User {
   avatar       String?
   role         Role     @default(USER)
   provider     String
-  universityId String? // optional, link to university
-  publicKey    String? // for E2EE
+  universityId String?
+  publicKey    String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  // Relations
+  communities Community[] @relation("UserCommunities")
+  followed    Community[] @relation("UserFollows")
 }
 
 enum Role {
   USER
   MODERATOR
   ADMIN
+}
+
+model Community {
+  id            String   @id @default(cuid())
+  communityName String   @unique
+  description   String
+  public        Boolean  @default(true)
+  topics        String[]
+  createdById   String
+  createdBy     User     @relation("UserCommunities", fields: [createdById], references: [id])
+  followers     User[]   @relation("UserFollows")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
