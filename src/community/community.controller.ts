@@ -21,7 +21,11 @@ export class CommunityController {
   @Get('me')
   @UseGuards(JwtAuthGuard)
   fetchMyCommunity(@GetUser('userId') userId: string) {
-    return this.communityService.getMyCommunity(userId);
+    return {
+      myCommunities: this.communityService.getMyCommunity(userId),
+      myFollowedCommunities:
+        this.communityService.getUserFollowedCommunities(userId),
+    };
   }
 
   @Post('me')
@@ -38,11 +42,6 @@ export class CommunityController {
     return this.communityService.getAllCommunities();
   }
 
-  @Get('me/followed')
-  @UseGuards(JwtAuthGuard)
-  fetchUserFollowedCommunity(@GetUser('userId') userId: string) {
-    return this.communityService.getUserFollowedCommunity(userId);
-  }
   @Patch('follow/:id')
   @UseGuards(JwtAuthGuard)
   followCommunity(

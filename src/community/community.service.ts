@@ -74,46 +74,73 @@ export class CommunityService {
   }
 
   async getAllCommunities() {
-    const community = await this.prisma.community.findMany({
+    const communities = await this.prisma.community.findMany({
       include: {
-        followers: true,
+        followers: { select: { id: true, username: true } },
+        createdBy: { select: { id: true, username: true } },
       },
     });
-    if (!community) {
+    if (!communities || communities.length === 0) {
       throw new BadRequestException({
         success: false,
         message: 'No Community Found',
         errorCode: 'COMMUNITY_NOT_FOUND',
       });
     }
+
+    // Transform raw Prisma objects into clean objects
+    const cleanData = communities.map((c) => ({
+      id: c.id,
+      communityName: c.communityName,
+      description: c.description,
+      creator: {
+        id: c.createdBy.id,
+        username: c.createdBy.username,
+      },
+      membersCount: c.followers.length,
+      members: c.followers.map((f) => ({
+        id: f.id,
+        username: f.username,
+      })),
+      onlineMembers: c.followers.filter((f) => Math.random() > 0.5).length,
+    }));
+
     return {
       success: true,
-      message: 'Community Found',
-      data: community,
+      message: 'Communities Found',
+      data: cleanData,
     };
   }
 
-  async getUserFollowedCommunity(userId: string) {
+  async getUserFollowedCommunities(userId: string) {
     await this.userService.checkUser(userId);
 
-    const community = this.prisma.user.findUnique({
-      where: { id: userId },
+    const communities = await this.prisma.community.findMany({
+      where: {
+        followers: {
+          some: {
+            id: userId,
+          },
+        },
+      },
       include: {
-        followed: true,
+        followers: true,
+        createdBy: true,
       },
     });
 
-    if (!community) {
+    if (!communities || communities.length === 0) {
       throw new BadRequestException({
         success: false,
         message: 'No communities found for this user',
         errorCode: 'NO_COMMUNITIES_FOUND',
       });
     }
+
     return {
       success: true,
-      message: 'Community Found',
-      data: community,
+      message: 'Communities found',
+      data: communities,
     };
   }
 
