@@ -1,0 +1,133 @@
+generator client {
+  provider      = "prisma-client-js"
+  output        = "./generated"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  MODERATOR
+  ADMIN
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  username     String   @unique
+  avatar       String?
+  role         Role     @default(USER)
+  provider     String
+  universityId String?
+  publicKey    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  communities   Community[]     @relation("UserCommunities")
+  followed      Community[]     @relation("UserFollows")
+  comments      Comment[]       @relation("UserComments")
+  posts         Post[]          @relation("UserPosts")
+  postVotes     PostVote[]      @relation("UserPostVotes")
+  commentVotes  CommentVote[]   @relation("UserCommentVotes")
+  savedPost     SavedPost[]     @relation("SavedPost")
+  savedComments SavedComments[] @relation("SavedComment")
+}
+
+model Community {
+  id            String   @id @default(cuid())
+  communityName String   @unique
+  description   String
+  public        Boolean  @default(true)
+  topics        String[]
+  createdById   String
+  createdBy     User     @relation("UserCommunities", fields: [createdById], references: [id])
+  followers     User[]   @relation("UserFollows")
+  posts         Post[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Post {
+  id          String      @id @default(cuid())
+  title       String
+  body        Json
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  communityId String
+  community   Community   @relation(fields: [communityId], references: [id])
+  authorId    String
+  author      User        @relation("UserPosts", fields: [authorId], references: [id])
+  comments    Comment[]   @relation("PostComments")
+  votes       PostVote[]  @relation("PostVotes")
+  saved       SavedPost[] @relation("SavedPosts")
+}
+
+model Comment {
+  id          String          @id @default(cuid())
+  body        String
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  commentById String
+  postId      String
+  parentId    String?
+    // Relations
+  commentBy   User            @relation("UserComments", fields: [commentById], references: [id])
+  post        Post            @relation("PostComments", fields: [postId], references: [id])
+  parent      Comment?        @relation("CommentReplies", fields: [parentId], references: [id])
+  replies     Comment[]       @relation("CommentReplies")
+  votes       CommentVote[]   @relation("CommentVotes")
+  saved       SavedComments[] @relation("SavedComments")
+}
+
+model PostVote {
+  id        String   @id @default(cuid())
+  value     Int
+  createdAt DateTime @default(now())
+  userId    String
+  user      User     @relation("UserPostVotes", fields: [userId], references: [id])
+  postId    String
+  post      Post     @relation("PostVotes", fields: [postId], references: [id])
+
+  @@unique([userId, postId])
+}
+
+model CommentVote {
+  id        String   @id @default(cuid())
+  value     Int
+  createdAt DateTime @default(now())
+  userId    String
+  user      User     @relation("UserCommentVotes", fields: [userId], references: [id])
+
+  commentId String
+  comment   Comment @relation("CommentVotes", fields: [commentId], references: [id])
+
+  @@unique([userId, commentId])
+}
+
+model SavedPost {
+  id        String   @id @default(cuid())
+  postId    String
+  posts     Post     @relation("SavedPosts", fields: [postId], references: [id])
+  userId    String
+  user      User     @relation("SavedPost", fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+}
+
+model SavedComments {
+  id        String   @id @default(cuid())
+  commentId String
+  comments  Comment  @relation("SavedComments", fields: [commentId], references: [id])
+  userId    String
+  user      User     @relation("SavedComment", fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, commentId])
+}
